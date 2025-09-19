@@ -36,30 +36,31 @@ const httpServer = app.listen(PORT, () => {
 const io = new Server(httpServer);
 
 io.on('connection', async (socket) => {
-    console.log('Cliente conectado a través de socket.io');
+  console.log('Cliente conectado a través de socket.io');
 
-    // Envía todos los productos al cliente recién conectado
-    const products = await productManager.getProducts();
-    socket.emit('productsUpdate', products);
+  // Envía todos los productos al cliente recién conectado
+  const products = await productManager.getProducts();
+  socket.emit('updateProducts', products); // <-- Corregido aquí
 
-    // Escucha eventos de "addProduct" o "deleteProduct" desde el cliente
-    socket.on('addProduct', async (newProduct) => {
-        try {
-            await productManager.addProduct(newProduct);
-            const updatedProducts = await productManager.getProducts();
-            io.emit('productsUpdate', updatedProducts); // Emite la lista actualizada a todos los clientes
-        } catch (error) {
-            console.error('Error al agregar producto:', error);
-        }
-    });
-    
-    socket.on('deleteProduct', async (productId) => {
-        try {
-            await productManager.deleteProduct(productId);
-            const updatedProducts = await productManager.getProducts();
-            io.emit('productsUpdate', updatedProducts); // Emite la lista actualizada a todos los clientes
-        } catch (error) {
-            console.error('Error al eliminar producto:', error);
-        }
-    });
+  // Escucha eventos de "addProduct" desde el cliente
+  socket.on('addProduct', async (newProduct) => {
+    try {
+      await productManager.addProduct(newProduct);
+      const updatedProducts = await productManager.getProducts();
+      io.emit('updateProducts', updatedProducts); // <-- Corregido aquí
+    } catch (error) {
+      console.error('Error al agregar producto:', error);
+    }
+  });
+
+  // Escucha eventos de "deleteProduct" desde el cliente
+  socket.on('deleteProduct', async (productId) => {
+    try {
+      await productManager.deleteProduct(productId);
+      const updatedProducts = await productManager.getProducts();
+      io.emit('updateProducts', updatedProducts); // <-- Y aquí
+    } catch (error) {
+      console.error('Error al eliminar producto:', error);
+    }
+  });
 });

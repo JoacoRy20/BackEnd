@@ -1,3 +1,5 @@
+// src/public/js/realTimeProducts.js
+
 const socket = io();
 
 // Escucha el evento 'updateProducts' desde el servidor
@@ -30,8 +32,8 @@ addProductForm.addEventListener('submit', (e) => {
   addProductForm.reset();
 });
 
-// Agrega un listener para los botones de eliminar
-document.addEventListener('click', (e) => {
+// Agrega un listener al ul para los clics en los botones de eliminar
+document.getElementById('productList').addEventListener('click', (e) => {
   if (e.target.classList.contains('delete-btn')) {
     const id = parseInt(e.target.dataset.id);
     socket.emit('deleteProduct', id);

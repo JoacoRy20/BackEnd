@@ -1,13 +1,1 @@
-[
-  {
-    "id": 1,
-    "title": "Mouse Gamer",
-    "description": "Mouse de alta precisión para juegos",
-    "code": "M-002",
-    "price": 45,
-    "stock": 50,
-    "category": "Periféricos",
-    "thumbnails": [],
-    "status": true
-  }
-]
+[]
