@@ -1,57 +1,80 @@
 const { Router } = require('express');
-const ProductManager = require('../managers/ProductManager');
-
+const Product = require('../models/Product'); // Importa el modelo
 const productsRouter = Router();
-const productManager = new ProductManager('products.json');
 
-// Listar todos los productos o una cantidad limitada por query
+// GET /api/products
 productsRouter.get('/', async (req, res) => {
-  const { limit } = req.query;
-  const products = await productManager.getProducts();
-  if (limit) {
-    return res.json(products.slice(0, limit));
+  try {
+    // Implementa la lógica de paginación, filtros y ordenamiento
+    const { limit = 10, page = 1, sort, query } = req.query;
+    const options = {
+      limit: parseInt(limit),
+      page: parseInt(page),
+      sort: sort ? { price: sort === 'asc' ? 1 : -1 } : {}
+    };
+
+    const filter = query ? { $or: [{ category: query }, { status: query }] } : {};
+
+    const result = await Product.paginate(filter, options);
+    
+    // Formatea la respuesta
+    const status = result.docs ? 'success' : 'error';
+    const hasPrevPage = result.hasPrevPage;
+    const hasNextPage = result.hasNextPage;
+    const prevLink = hasPrevPage ? `/api/products?limit=${limit}&page=${result.prevPage}&sort=${sort || ''}&query=${query || ''}` : null;
+    const nextLink = hasNextPage ? `/api/products?limit=${limit}&page=${result.nextPage}&sort=${sort || ''}&query=${query || ''}` : null;
+    
+    res.json({
+      status,
+      payload: result.docs,
+      totalPages: result.totalPages,
+      prevPage: result.prevPage,
+      nextPage: result.nextPage,
+      page: result.page,
+      hasPrevPage,
+      hasNextPage,
+      prevLink,
+      nextLink
+    });
+  } catch (error) {
+    res.status(500).json({ status: 'error', payload: 'Error al obtener productos' });
   }
-  res.json(products);
 });
 
-// Traer un producto por su ID
-productsRouter.get('/:pid', async (req, res) => {
-  const { pid } = req.params;
-  const product = await productManager.getProductById(parseInt(pid));
-  if (product) {
-    return res.json(product);
-  }
-  res.status(404).json({ message: 'Producto no encontrado.' });
-});
-
-// Agregar un nuevo producto
+// POST /api/products
 productsRouter.post('/', async (req, res) => {
-  const { title, description, code, price, stock, category, thumbnails } = req.body;
-  if (!title || !description || !code || !price || !stock || !category) {
-    return res.status(400).json({ message: 'Faltan campos obligatorios.' });
+  try {
+    const newProduct = await Product.create(req.body);
+    res.status(201).json(newProduct);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
-  const newProduct = await productManager.addProduct(req.body);
-  res.status(201).json(newProduct);
 });
 
-// Actualizar un producto por su ID
+// PUT /api/products/:pid
 productsRouter.put('/:pid', async (req, res) => {
-  const { pid } = req.params;
-  const updatedProduct = await productManager.updateProduct(parseInt(pid), req.body);
-  if (updatedProduct) {
-    return res.json(updatedProduct);
+  try {
+    const updatedProduct = await Product.findByIdAndUpdate(req.params.pid, req.body, { new: true });
+    if (!updatedProduct) {
+      return res.status(404).json({ message: 'Producto no encontrado' });
+    }
+    res.json(updatedProduct);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
-  res.status(404).json({ message: 'Producto no encontrado.' });
 });
 
-// Eliminar un producto por su ID
+// DELETE /api/products/:pid
 productsRouter.delete('/:pid', async (req, res) => {
-  const { pid } = req.params;
-  const success = await productManager.deleteProduct(parseInt(pid));
-  if (success) {
-    return res.json({ message: 'Producto eliminado.' });
+  try {
+    const deletedProduct = await Product.findByIdAndDelete(req.params.pid);
+    if (!deletedProduct) {
+      return res.status(404).json({ message: 'Producto no encontrado' });
+    }
+    res.status(200).json({ message: 'Producto eliminado' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
-  res.status(404).json({ message: 'Producto no encontrado.' });
 });
 
 module.exports = productsRouter;

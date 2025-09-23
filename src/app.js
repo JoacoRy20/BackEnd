@@ -5,10 +5,20 @@ const productsRouter = require('./routes/products.router');
 const cartsRouter = require('./routes/carts.router');
 const viewsRouter = require('./routes/views.router');
 const ProductManager = require('./managers/ProductManager');
+const mongoose = require('mongoose');
 
 const app = express();
 const PORT = 8080;
 const productManager = new ProductManager('products.json');
+
+// Conexión a MongoDB
+mongoose.connect('mongodb+srv://JoacoR20:gQpb4PnOjloGLRx6@cluster0.l9vwgd8.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
+  .then(() => {
+    console.log('Conectado a la base de datos de MongoDB');
+  })
+  .catch(err => {
+    console.error('Error de conexión a MongoDB', err);
+  });
 
 // Middlewares
 app.use(express.json());

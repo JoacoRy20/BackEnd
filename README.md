@@ -1,37 +1,44 @@
-# Entrega N° 2 - Servidor de Productos en Tiempo Real
-
-¡Hola! Este es un servidor de Node.js y Express para gestionar productos y carritos de compra.
-
 ## 🚀 Cómo iniciar el servidor
 
-1.  Asegúrate de tener Node.js instalado.
-2.  Abre la terminal en la carpeta principal del proyecto.
-3.  Instala las dependencias con el siguiente comando:
+1.  Asegúrate de tener **Node.js** y **MongoDB Atlas** configurado.
+2.  Abre la terminal en la carpeta principal de tu proyecto.
+3.  Instala todas las dependencias con el siguiente comando:
     ```bash
     npm install
     ```
-4.  Inicia el servidor con el siguiente comando:
+4.  Para iniciar el servidor, usa el comando:
     ```bash
     npm start
     ```
-    *Nota: Si el comando `npm start` no funciona, puedes usar `node src/app.js` para iniciar el servidor directamente.*
+    *Nota: Si `npm start` te da un error, usa `node src/app.js`.*
 
 ## 📄 Endpoints de la API
 
-Una vez que el servidor esté corriendo, puedes probar los siguientes endpoints usando una herramienta como Postman o Thunder Client:
+Una vez que el servidor esté funcionando, puedes probar los siguientes endpoints para gestionar productos y carritos:
 
-* **`GET /api/products`**: Lista todos los productos.
-* **`POST /api/products`**: Agrega un nuevo producto.
-* **`GET /api/products/:pid`**: Obtiene un producto por ID.
-* **`PUT /api/products/:pid`**: Actualiza un producto.
-* **`DELETE /api/products/:pid`**: Elimina un producto.
-* **`POST /api/carts`**: Crea un nuevo carrito.
-* **`GET /api/carts/:cid`**: Lista los productos de un carrito.
-* **`POST /api/carts/:cid/product/:pid`**: Agrega un producto a un carrito.
+### Endpoints de Productos (`/api/products`)
+
+  * **`GET /`**: Lista todos los productos con paginación, filtros y ordenamiento.
+      * **Ejemplo con filtros**: `http://localhost:8080/api/products?limit=5&page=2&sort=asc&query=libros`
+  * **`POST /`**: Agrega un nuevo producto.
+  * **`GET /:pid`**: Obtiene un producto por su ID.
+  * **`PUT /:pid`**: Actualiza un producto por su ID.
+  * **`DELETE /:pid`**: Elimina un producto por su ID.
+
+### Endpoints de Carritos (`/api/carts`)
+
+  * **`POST /`**: Crea un nuevo carrito.
+  * **`GET /:cid`**: Lista los productos de un carrito específico. Esta ruta usa `populate` para mostrar todos los detalles del producto, no solo su ID.
+  * **`POST /:cid/product/:pid`**: Agrega un producto a un carrito.
+  * **`PUT /:cid`**: Actualiza todos los productos de un carrito con un arreglo nuevo.
+  * **`PUT /:cid/products/:pid`**: Actualiza solo la cantidad de un producto específico en el carrito.
+  * **`DELETE /:cid/products/:pid`**: Elimina un producto de un carrito.
+  * **`DELETE /:cid`**: Vacía por completo un carrito.
 
 ## ✨ Vistas con Handlebars y WebSockets
 
-Las vistas de este proyecto se renderizan con Handlebars y se actualizan en tiempo real usando WebSockets.
+Las vistas ahora interactúan directamente con la base de datos de MongoDB.
 
-* **`http://localhost:8080/`**: Vista estática que muestra todos los productos agregados.
-* **`http://localhost:8080/realtimeproducts`**: Vista que se actualiza en tiempo real. Aquí puedes agregar y eliminar productos, y la lista se refrescará automáticamente para todos los clientes conectados.
+  * **`http://localhost:8080/products`**: Visualiza todos los productos con **paginación**.
+  * **`http://localhost:8080/realtimeproducts`**: Muestra la lista de productos que se actualiza en **tiempo real** al agregar o eliminar.
+  * **`http://localhost:8080/carts/:cid`**: Muestra los productos de un carrito específico, ideal para probar la función `populate`.
